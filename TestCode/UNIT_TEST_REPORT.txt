@@ -1,0 +1,94 @@
+=====================================================================
+= PCO UNIT TEST for Data Report;Report of Likely outcome=
+=====================================================================
+=====================================================================
+= PCO UNIT TEST for Data Report: STEP 1 =
+=====================================================================
+[1] TRUE
+
+
+processing file: report.Rmd
+  |                                                                         |                                                                 |   0%  |                                                                         |......                                                           |   9%
+   inline R code fragments
+
+  |                                                                         |............                                                     |  18%
+label: table1 (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                         |..................                                               |  27%
+  ordinary text without R code
+
+  |                                                                         |........................                                         |  36%
+label: profile1 (with options) 
+List of 8
+ $ collapse  : logi TRUE
+ $ echo      : logi FALSE
+ $ warning   : logi FALSE
+ $ error     : logi FALSE
+ $ prompt    : logi FALSE
+ $ message   : logi FALSE
+ $ fig.width : num 10
+ $ fig.height: num 3
+
+  |                                                                         |..............................                                   |  45%
+  ordinary text without R code
+
+  |                                                                         |...................................                              |  55%
+label: profile2 (with options) 
+List of 8
+ $ collapse  : logi TRUE
+ $ echo      : logi FALSE
+ $ warning   : logi FALSE
+ $ error     : logi FALSE
+ $ prompt    : logi FALSE
+ $ message   : logi FALSE
+ $ fig.width : num 8
+ $ fig.height: num 3
+
+  |                                                                         |.........................................                        |  64%
+  ordinary text without R code
+
+  |                                                                         |...............................................                  |  73%
+label: guage (with options) 
+List of 10
+ $ collapse  : logi TRUE
+ $ echo      : logi FALSE
+ $ warning   : logi FALSE
+ $ error     : logi FALSE
+ $ prompt    : logi FALSE
+ $ message   : logi FALSE
+ $ fig.width : num 4
+ $ fig.height: num 5
+ $ fig.align : chr "center"
+ $ fig.env   : chr "marginfigure"
+
+  |                                                                         |.....................................................            |  82%
+  ordinary text without R code
+
+  |                                                                         |...........................................................      |  91%
+label: riskprofile (with options) 
+List of 9
+ $ collapse  : logi TRUE
+ $ echo      : logi FALSE
+ $ warning   : logi FALSE
+ $ error     : logi FALSE
+ $ prompt    : logi FALSE
+ $ message   : logi FALSE
+ $ fig.width : num 8
+ $ fig.height: num 4
+ $ fig.align : chr "center"
+
+Loading required package: gridExtra
+  |                                                                         |.................................................................| 100%
+  ordinary text without R code
+
+
+output file: report.knit.md
+
+/usr/local/bin/pandoc +RTS -K512m -RTS report.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash --output report.pdf --template /Library/Frameworks/R.framework/Versions/3.3/Resources/library/rmarkdown/rmd/latex/default-1.17.0.2.tex --highlight-style tango --latex-engine /Library/TeX/texbin/pdflatex --variable graphics=yes 
+
+Output created: report.pdf
+
+[Done] Unit Test For:  report.Rmd
+=============================================

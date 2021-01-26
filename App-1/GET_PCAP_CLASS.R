@@ -1,0 +1,46 @@
+# Submitted to OSEHRA 05/25/2017 by Jihwan Park.
+# Original routine authored by Jihwan Park 2017.
+
+# GET_PCAP_CLASS.R
+
+getPCaPScore <- function(..., pAGE_CATEGORY, pRISK_CATEGORY, pT_STAGE_CATEGORY) {
+  AGE_CATEGORY_SCORE = 0
+  RISK_CATEGORY_SCORE = 0
+  T_STAGE_CATEGORY_SCORE = 0
+  PCAP_SCORE = 0
+  PCAP_CLASS = 0
+  
+  AGE_CATEGORY_SCORE = switch(pAGE_CATEGORY,"1" = 0, "2" = 33, "3" = 67, "4" = 100)
+  RISK_CATEGORY_SCORE = switch(pRISK_CATEGORY,"1" = 0, "2" = 13, "3" = 26, "4" = 40, "5" = 53)
+  T_STAGE_CATEGORY_SCORE = switch(pT_STAGE_CATEGORY,"1" = 0, "2" = 1, "3" = 2, "4" = 3)
+  
+  PCAP_SCORE <- (AGE_CATEGORY_SCORE + RISK_CATEGORY_SCORE + T_STAGE_CATEGORY_SCORE)
+
+  return(PCAP_SCORE)
+}
+
+getPCaPClass <- function(..., pAGE_CATEGORY, pRISK_CATEGORY, pT_STAGE_CATEGORY) {
+  AGE_CATEGORY_SCORE = 0
+  RISK_CATEGORY_SCORE = 0
+  T_STAGE_CATEGORY_SCORE = 0
+  PCAP_SCORE = 0
+  PCAP_CLASS = 0
+
+  AGE_CATEGORY_SCORE = switch(pAGE_CATEGORY,"1" = 0, "2" = 33, "3" = 67, "4" = 100)
+  RISK_CATEGORY_SCORE = switch(pRISK_CATEGORY,"1" = 0, "2" = 13, "3" = 26, "4" = 40, "5" = 53)
+  T_STAGE_CATEGORY_SCORE = switch(pT_STAGE_CATEGORY,"1" = 0, "2" = 1, "3" = 2, "4" = 3)
+  
+  PCAP_SCORE <- (AGE_CATEGORY_SCORE + RISK_CATEGORY_SCORE + T_STAGE_CATEGORY_SCORE)
+  
+  
+  if (PCAP_SCORE >= 0 & PCAP_SCORE <= 37) {
+    PCAP_CLASS = "1"
+  } else if (PCAP_SCORE >= 38 & PCAP_SCORE <= 118) {
+    PCAP_CLASS = "2"
+  } else if (PCAP_SCORE >= 119 & PCAP_SCORE <= 167) {
+    PCAP_CLASS = "3"
+  }
+
+  
+  return(PCAP_CLASS)
+}

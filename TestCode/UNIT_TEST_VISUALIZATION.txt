@@ -1,0 +1,28 @@
+=====================================================================
+= PCO UNIT TEST for Data Visualization;Visualization of Likely outcome=
+=====================================================================
+=====================================================================
+= PCO UNIT TEST for Data Visualization: STEP 1 =
+=====================================================================
+[1] TRUE
+
+[Done] Unit Test For:  GAUGE_CHART.R
+=============================================
+=====================================================================
+= PCO UNIT TEST for Data Visualization: STEP 2 =
+=====================================================================
+[1] TRUE
+=============================================
+Warning on:  OverallVSProfile.R
+Here's the orginal warning message:
+We recommend that you use the dev version of ggplot2 with `ggplotly()`
+Install it with: `devtools::install_github('hadley/ggplot2')`
+[Done] Unit Test For:  OverallVSProfile.R
+=============================================
+=====================================================================
+= PCO UNIT TEST for Data Visualization: STEP 3 =
+=====================================================================
+[1] TRUE
+
+[Done] Unit Test For:  DiseaseFree_Risk.R
+=============================================

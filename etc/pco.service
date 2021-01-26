@@ -1,0 +1,15 @@
+[Unit]
+Description=pco
+After=mysql.service
+Requires=mysql.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/srv/shiny-server/PCO
+ExecStart=/srv/shiny-server/PCO/PCO_service.sh
+TimeoutSec=120
+
+[Install]
+WantedBy=multi-user.target
+

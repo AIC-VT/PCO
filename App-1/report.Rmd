@@ -1,0 +1,692 @@
+Patient's Report / Date: `r Sys.Date()` / Doctor: `r paste(nData()$df$Doctor,"\n")`
+---
+output: pdf_document
+fontsize: 8pt
+geometry: margin=0.2in
+---
+
+
+```{r table1, echo=FALSE}
+sdata <- nData()$df
+knitr::kable(head(sdata[1,2:6]),row.names = FALSE,caption="Patient Information", align = 'c', padding = 4)
+```
+
+
+```{r profile1, collapse=TRUE, echo=FALSE, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE, fig.width=10, fig.height=3}
+################################
+# overall vs patient specific start
+################################
+vsfunc <- function(..., vSurvData, vPlotData, vNData) {
+  
+  #if ( vNData$T_STAGE_CATEGORY == "5") {
+  #  vSurvData2 = vSurvData[which( (vSurvData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vSurvData$T_STAGE_CATEGORY == 4 | vSurvData$T_STAGE_CATEGORY == 5)
+  #                                & (vSurvData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #} else {
+  #  vSurvData2 = vSurvData[which( (vSurvData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vSurvData$T_STAGE_CATEGORY == vNData$T_STAGE_CATEGORY)
+  #                                & (vSurvData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #}
+  vSurvData2 = vSurvData[which (vSurvData$PCAP_CLASS == vNData$PCAP_CLASS),]
+  
+  #if ( vNData$T_STAGE_CATEGORY == "5") {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == 4 | vPlotData$T_STAGE_CATEGORY == 5)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #} else {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == vNData$T_STAGE_CATEGORY)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #}
+  vPlotData2 = vPlotData[which (vPlotData$PCAP_CLASS == vNData$PCAP_CLASS),]
+  if ( nrow(vPlotData2) >= 1 ) {
+    # patient
+    nCount2 <- c(table(vPlotData2$Time_Point))
+    cond2 <- lapply(nCount2, function(x) x > vNData$MinNum)
+    nCount2 <- nCount2[unlist(cond2)]
+    vPlotData2 <- vPlotData2[which(vPlotData2$Time_Point %in% c(names(nCount2))),]
+  }
+  labs <- c("Relapse Free", "Rectal Risk Free", "Bladdar Risk Free", "Erectile Dysfunction Free")
+  
+  
+  require("survminer")
+  require("survival")
+  
+  # overall
+  fit1 <- survfit(Surv(SurvDays,isBCR==1)~1, data=vSurvData)
+  
+  # report data
+  prob1 <- summary(fit1, times = 1800, censored=TRUE, scale=1, extend=TRUE, rmean=getOption('survfit.rmean'))$surv
+  overallDiseaseFree <- round(prob1*100,2)
+  
+  # Timepoint 16 : 5 year
+
+  #overallRectalFree <- (round(mean(vPlotData[which(vPlotData$Time_Point == 16),"RECTAL_MEAN"]),2))
+  #overallRectalBloodFree <- round(mean(vPlotData[which(vPlotData$Time_Point == 16),"EPIC_Q6_D_SCORE"]),2)
+  #overallUrinaryFree <- round(mean(vPlotData[which(vPlotData$Time_Point == 16),"EPIC_Q5_SCORE"]),2)
+  #overallUrinaryBloodFree <- round(mean(vPlotData[which(vPlotData$Time_Point == 16),"EPIC_Q4_C_SCORE"]),2)
+  #overallErectileDysfunctionFree <- round(mean(vPlotData[which(vPlotData$Time_Point == 16),"SEXUAL_QOL_MEAN"]),2)
+  overallRectalFree <- getProfileValue(dfSource = vPlotData, profileCondition = "RECTAL_MEAN")
+  overallRectalBloodFree <- 100-getProfileValue(dfSource = vPlotData, profileCondition = "EPIC_Q6_D_SCORE")
+  overallUrinaryFree <- getProfileValue(dfSource = vPlotData, profileCondition = "EPIC_Q5_SCORE")
+  overallUrinaryBloodFree <- 100-getProfileValue(dfSource = vPlotData, profileCondition = "EPIC_Q4_C_SCORE")
+  #overallErectileDysfunctionFree <- 100-getProfileValue(dfSource = vPlotData, profileCondition = "SEXUAL_QOL_MEAN")
+  overallErectileDysfunctionFree <- getProfileValue(dfSource = vPlotData, profileCondition = "SEXUAL_QOL_MEAN")
+  if ( nrow(vPlotData2) >= 1 ) {
+    # patient
+    fit2 <- survfit(Surv(SurvDays,isBCR==1)~1, data=vSurvData2)
+    
+    prob2 <- summary(fit2, times = 1800, censored=TRUE, scale=1, extend=TRUE, rmean=getOption('survfit.rmean'))$surv
+    patientDiseaseFree <- round(prob2*100,2)
+    
+    #patientRectalFree <- (round(mean(vPlotData2[which(vPlotData2$Time_Point == 16),"RECTAL_MEAN"]),2))
+    #patientRectalBloodFree <- round(mean(vPlotData2[which(vPlotData2$Time_Point == 16),"EPIC_Q6_D_SCORE"]),2) 
+    #patientUrinaryFree <- (round(mean(vPlotData2[which(vPlotData2$Time_Point == 16),"EPIC_Q5_SCORE"]),2))
+    #patientUrinaryBloodFree <- round(mean(vPlotData2[which(vPlotData2$Time_Point == 16),"EPIC_Q4_C_SCORE"]),2) 
+    #patientErectileDysfunctionFree <- round(mean(vPlotData2[which(vPlotData2$Time_Point == 16),"SEXUAL_QOL_MEAN"]),2) 
+    patientRectalFree <- getProfileValue(dfSource = vPlotData2, profileCondition = "RECTAL_MEAN")
+    patientRectalBloodFree <- 100-getProfileValue(dfSource = vPlotData2, profileCondition = "EPIC_Q6_D_SCORE")
+    patientUrinaryFree <- getProfileValue(dfSource = vPlotData2, profileCondition = "EPIC_Q5_SCORE")
+    patientUrinaryBloodFree <- 100-getProfileValue(dfSource = vPlotData2, profileCondition = "EPIC_Q4_C_SCORE")
+    #patientErectileDysfunctionFree <- 100-getProfileValue(dfSource = vPlotData2, profileCondition = "SEXUAL_QOL_MEAN")
+    patientErectileDysfunctionFree <- getProfileValue(dfSource = vPlotData2, profileCondition = "SEXUAL_QOL_MEAN")
+    dfScores <- data.frame(
+      Section = factor(c("Reference","Reference","Reference","Reference","Reference","Reference",
+                         "Patient Specific","Patient Specific","Patient Specific","Patient Specific","Patient Specific","Patient Specific")),
+      Profile = factor(c("Relapse Free Survival(+)","Rectal QOL(+)","Rectal Bleeding(-)","Urinary QOL(+)","Urinary Bleeding(-)","Sexual QOL(+)",
+                         "Relapse Free Survival(+)","Rectal QOL(+)","Rectal Bleeding(-)","Urinary QOL(+)","Urinary Bleeding(-)","Sexual QOL(+)"), 
+                       levels=c("Relapse Free Survival(+)","Rectal QOL(+)","Rectal Bleeding(-)","Urinary QOL(+)","Urinary Bleeding(-)","Sexual QOL(+)")),
+      Value = c(overallDiseaseFree, overallRectalFree,overallRectalBloodFree,overallUrinaryFree,overallUrinaryBloodFree,overallErectileDysfunctionFree,
+                patientDiseaseFree, patientRectalFree,patientRectalBloodFree,patientUrinaryFree,patientUrinaryBloodFree,patientErectileDysfunctionFree)
+    )
+  } else {
+    dfScores <- data.frame(
+      Section = factor(c("Reference","Reference","Reference","Reference","Reference","Reference")),
+      Profile = factor(c("Relapse Free Survival(+)","Rectal QOL(+)","Rectal Bleeding(-)","Urinary QOL(+)","Urinary Bleeding(-)","Sexual QOL(+)"), 
+                       levels=c("Relapse Free Survival(+)","Rectal QOL(+)","Rectal Bleeding(-)","Urinary QOL(+)","Urinary Bleeding(-)","Sexual QOL(+)")),
+      Value = c(overallDiseaseFree, overallRectalFree,overallRectalBloodFree,overallUrinaryFree,overallUrinaryBloodFree,overallErectileDysfunctionFree)
+    )
+    
+  }
+  
+  dfScores$Section <- factor(dfScores$Section, levels = c("Reference","Patient Specific"))
+  dfScores$Profile <- factor(dfScores$Profile, levels = c("Relapse Free Survival(+)",
+                                                          "Rectal QOL(+)","Urinary QOL(+)","Sexual QOL(+)",
+                                                          "Rectal Bleeding(-)", "Urinary Bleeding(-)"
+                                                          ))
+  
+  p <- ggplot(data=dfScores, aes(x=Profile, y=Value, fill=Section)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    scale_fill_manual(values=c("#2F8BAF", "yellowgreen")) +
+    ggtitle("Relapse Free Suvival Probability - at 5 years")
+  p #+ coord_flip()
+}
+vsfunc(vSurvData = survData, vPlotData = values$df, vNData = nData()$df)
+################################
+# overall vs patient specific end
+################################
+```
+
+
+```{r profile2, collapse=TRUE, echo=FALSE, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE, fig.width=8, fig.height=3}
+################################
+# disease free profile start
+################################
+################################################
+# FILE: DiseaseFree_Risk.R
+# DESC: BCR free 5 year survival probability (%)
+################################################
+######## calc function
+calcSurvFunc <- function(..., vValues, vNData, vOption = "PSA", vSurvData,
+                         vGroupOption = "T-Stage", vFontSize=5, vLFontSize=5, vInput = "") {
+  #if ( vNData$T_STAGE_CATEGORY == "5") {
+  #  vSurvData2 = vSurvData[which( (vSurvData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vSurvData$T_STAGE_CATEGORY == 4 | vSurvData$T_STAGE_CATEGORY == 5)
+  #                                & (vSurvData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #} else {
+  #  vSurvData2 = vSurvData[which( (vSurvData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vSurvData$T_STAGE_CATEGORY == vNData$T_STAGE_CATEGORY)
+  #                                & (vSurvData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #}
+  vSurvData2 = vSurvData[which (vSurvData$PCAP_CLASS == vNData$PCAP_CLASS),]
+  ##############################################
+  ##### Kaplan-Meier curve
+  require("survminer")
+  require("survival")
+  fit1 <- survfit(Surv(SurvDays,isBCR==1)~1, data=vSurvData)
+  prob1 <- summary(fit1, times = 1800, censored=TRUE, scale=1, extend=TRUE, rmean=getOption('survfit.rmean'))$surv
+  result1 <- round(prob1*100,2)
+  
+  if ( nrow(vSurvData2) >= 1 ) {
+    fit2 <- survfit(Surv(SurvDays,isBCR==1)~1, data=vSurvData2)
+    prob2 <- summary(fit2, times = 1800, censored=TRUE, scale=1, extend=TRUE, rmean=getOption('survfit.rmean'))$surv
+    result2 <- round(prob2*100,2)
+    
+    Section <- c("Overall","Patient Specific Data")
+    Probability <- c(result1,result2)
+  } else {
+    Section <- c("Overall")
+    Probability <- c(result1)
+  }
+  
+  riskTable <- data.frame(Section, Probability)
+  return (riskTable)
+}
+
+dfDiseaseFree <- calcSurvFunc(vValues = values,
+                 vNData = nData()$df, 
+                 vOption = "PSA", 
+                 vSurvData = survData,
+                 vGroupOption = input$GroupOption,
+                 vFontSize = 10,
+                 vLFontSize = 5,
+                 vInput = input)
+
+#knitr::kable(head(dfDiseaseFree),row.names = FALSE,caption="Disease free probability", align = 'c', padding = 11)
+```
+
+
+```{r guage, collapse=TRUE, echo=FALSE, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE, fig.width=4, fig.height=5, fig.align="center", fig.env='marginfigure'}
+################################
+# GAUGE CHART START
+################################
+circle <- function(center=c(0,0), radius=1, npoints=156)
+{
+  r = radius
+  tt = seq(0, 2*pi, length=npoints)
+  xx = center[1] + r * cos(tt)
+  yy = center[1] + r * sin(tt)
+  return(data.frame(x = xx, y = yy))
+}
+
+# function to get slices
+slice2xy <- function(t, rad) 
+{
+  t2p = -1 * t * pi + 10*pi/8
+  list(x = rad * cos(t2p), y = rad * sin(t2p))
+}
+
+# function to get major and minor tick marks
+ticks <- function(center=c(0,0), from=0, to=2*pi, radius=0.9, npoints=5)
+{
+  r = radius
+  tt = seq(from, to, length=npoints)
+  xx = center[1] + r * cos(tt)
+  yy = center[1] + r * sin(tt)
+  return(data.frame(x = xx, y = yy))
+}
+
+riskGaugeFunc <- function (..., nValue = 0) {
+  maxPoints = 156
+  # external circle (this will be used for the black border)
+  border_cir = circle(c(0,0), radius=1, npoints = maxPoints)
+  
+  # gray border circle
+  external_cir = circle(c(0,0), radius=0.97, npoints = maxPoints)
+  
+  # green slice (this will be used for the yellow band)
+  greenFrom = 0
+  greenTo = 34
+  gre_ini = (greenFrom/maxPoints) * (12/8)
+  gre_fin = (greenTo/maxPoints) * (12/8)
+  Sgre = slice2xy(seq.int(gre_ini, gre_fin, length.out = 30), rad=0.9)
+  
+  # yellow slice (this will be used for the yellow band)
+  yellowFrom = 35
+  yellowTo = 115
+  yel_ini = (yellowFrom/maxPoints) * (12/8)
+  yel_fin = (yellowTo/maxPoints) * (12/8)
+  Syel = slice2xy(seq.int(yel_ini, yel_fin, length.out = 30), rad=0.9)
+  
+  # red slice (this will be used for the red band)
+  redFrom = 116
+  redTo = maxPoints
+  red_ini = (redFrom/maxPoints) * (12/8)
+  red_fin = (redTo/maxPoints) * (12/8)
+  Sred = slice2xy(seq.int(red_ini, red_fin, length.out = 30), rad=0.9)
+  
+  # white slice (this will be used to get the yellow and red bands)
+  whiteFrom = 0
+  whiteTo = maxPoints
+  white_ini = (whiteFrom/maxPoints) * (12/8)
+  white_fin = (whiteTo/maxPoints) * (12/8)
+  Swhi = slice2xy(seq.int(white_ini, white_fin, length.out = 30), rad=0.8)
+  
+  # coordinates of major ticks (will be plotted as arrows)
+  major_ticks_out = ticks(c(0,0), from=5*pi/4, to=-pi/4, radius=0.9, 5)
+  major_ticks_in = ticks(c(0,0), from=5*pi/4, to=-pi/4, radius=0.75, 5)
+  
+  # coordinates of minor ticks (will be plotted as arrows)
+  tix1_out = ticks(c(0,0), from=5*pi/4, to=5*pi/4-3*pi/8, radius=0.9, 6)
+  tix2_out = ticks(c(0,0), from=7*pi/8, to=7*pi/8-3*pi/8, radius=0.9, 6)
+  tix3_out = ticks(c(0,0), from=4*pi/8, to=4*pi/8-3*pi/8, radius=0.9, 6)
+  tix4_out = ticks(c(0,0), from=pi/8, to=pi/8-3*pi/8, radius=0.9, 6)
+  tix1_in = ticks(c(0,0), from=5*pi/4, to=5*pi/4-3*pi/8, radius=0.85, 6)
+  tix2_in = ticks(c(0,0), from=7*pi/8, to=7*pi/8-3*pi/8, radius=0.85, 6)
+  tix3_in = ticks(c(0,0), from=4*pi/8, to=4*pi/8-3*pi/8, radius=0.85, 6)
+  tix4_in = ticks(c(0,0), from=pi/8, to=pi/8-3*pi/8, radius=0.85, 6)
+  
+  # coordinates of min and max values (0, 100)
+  v0 = -1 * 0 * pi + 10*pi/8
+  z0x = 0.65 * cos(v0)
+  z0y = 0.65 * sin(v0)
+  
+  v25 = -1 * 3/8 * pi + 10*pi/8
+  z25x = 0.65 * cos(v25)
+  z25y = 0.65 * sin(v25)
+  
+  v50 = -1 * 6/8 * pi + 10*pi/8
+  z50x = 0.65 * cos(v50)
+  z50y = 0.65 * sin(v50)
+  
+  v75 = -1 * 9/8 * pi + 10*pi/8
+  z75x = 0.65 * cos(v75)
+  z75y = 0.65 * sin(v75)
+  
+  v100 = -1 * 12/8 * pi + 10*pi/8
+  z100x = 0.65 * cos(v100)
+  z100y = 0.65 * sin(v100)
+  #######################################################################
+  # indicated value, say 80 (you can choose another number between 0-100)
+  value = nValue
+  
+  # angle of needle pointing to the specified value
+  val = (value/maxPoints) * (12/8)
+  v = -1 * val * pi + 10*pi/8
+  # x-y coordinates of needle
+  val_x = 0.7 * cos(v)
+  val_y = 0.7 * sin(v)
+  
+  # label to be displayed
+  if ( nValue <= 34 ) {
+    label = "Low"
+    labelcolor = "yellowgreen"
+  }
+  else if ( nValue > 34 & nValue <= 115) {
+    label = "Intermediate"
+    labelcolor = "orange"
+  }  
+  else if ( nValue > 115) {
+    label = "High"
+    labelcolor = "red"
+  }
+  
+  # open plot
+  plot(border_cir$x, border_cir$y, type="n", asp=1, axes=FALSE,
+       xlim=c(-1.05,1.05), ylim=c(-1.05,1.05),
+       xlab="", ylab="")
+  # green slice
+  polygon(c(Sgre$x, 0), c(Sgre$y, 0),
+          border = "yellowgreen", col = "yellowgreen", lty = NULL)
+  # yellow slice
+  polygon(c(Syel$x, 0), c(Syel$y, 0),
+          border = "#FF9900", col = "#FF9900", lty = NULL)
+  # red slice
+  polygon(c(Sred$x, 0), c(Sred$y, 0),
+          border = "#DC3912", col = "#DC3912", lty = NULL)
+  # white slice
+  polygon(c(Swhi$x, 0), c(Swhi$y, 0),
+          border = "white", col = "white", lty = NULL)
+  # add gray border
+  lines(external_cir$x, external_cir$y, col="gray85", lwd=2)
+  # add external border
+  lines(border_cir$x, border_cir$y, col="gray20", lwd=2)
+  # add minor ticks
+  arrows(x0=tix1_out$x, y0=tix1_out$y, x1=tix1_in$x, y1=tix1_in$y,
+         length=0, lwd=2.5, col="gray55")
+  arrows(x0=tix2_out$x, y0=tix2_out$y, x1=tix2_in$x, y1=tix2_in$y,
+         length=0, lwd=2.5, col="gray55")
+  arrows(x0=tix3_out$x, y0=tix3_out$y, x1=tix3_in$x, y1=tix3_in$y,
+         length=0, lwd=2.5, col="gray55")
+  arrows(x0=tix4_out$x, y0=tix4_out$y, x1=tix4_in$x, y1=tix4_in$y,
+         length=0, lwd=2.5, col="gray55")
+  # add major ticks
+  arrows(x0=major_ticks_out$x, y0=major_ticks_out$y,
+         x1=major_ticks_in$x, y1=major_ticks_in$y, length=0, lwd=4)
+  # add needle
+  arrows(0, 0, val_x, val_y, col="#999999", lwd=10, lty=1)
+  # add value
+  text(0, 0.35, value, cex=2.5, col=labelcolor)
+  # add label of variable
+  text(0, -0.75, "Risk", cex=1.8, col=labelcolor)
+  text(0, -0.55, label, cex=1.8, col=labelcolor)
+  # add central blue point
+  points(0, 0, col="#999999", pch=19, cex=2)
+  points(0, 0, col="#000000", pch=19, cex=1)
+  # add values 0 and maxPoints
+  val0 = 0
+  val25 = maxPoints * 0.25
+  val50 = maxPoints * 0.5
+  val75 = maxPoints * 0.75
+  text(z0x, z0y, labels=val0, col="yellowgreen")
+  text(z25x, z25y, labels=val25, col="orange")
+  text(z50x, z50y, labels=val50, col="orange")
+  text(z75x, z75y, labels=val75, col="red")
+  text(z100x, z100y, labels=maxPoints, col="red")
+}
+
+score = getPCaPScore(pAGE_CATEGORY = nData()$df$AGE_CATEGORY,
+                        pRISK_CATEGORY = nData()$df$RISK_CATEGORY,
+                        pT_STAGE_CATEGORY = nData()$df$T_STAGE_CATEGORY)
+riskGaugeFunc(nValue = score)
+
+################################
+# GAUGE CHART END
+################################
+```
+
+
+```{r riskprofile, collapse=TRUE, echo=FALSE, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE, fig.width=8, fig.height=4, fig.align="center"}
+################################
+# disease free profile end
+################################
+
+################################
+# rectal risk overall start
+################################
+riskfunc <- function(..., vPlotData, vNData) {
+  
+  #if ( vNData$T_STAGE_CATEGORY == "5") {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == 4 | vPlotData$T_STAGE_CATEGORY == 5)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #} else {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == vNData$T_STAGE_CATEGORY)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #}
+  vPlotData2 = vPlotData[which (vPlotData$PCAP_CLASS == vNData$PCAP_CLASS),]
+  if ( nrow(vPlotData2) >= 1 ) {
+    # patient
+    nCount2 <- c(table(vPlotData2$Time_Point))
+    cond2 <- lapply(nCount2, function(x) x > vNData$MinNum)
+    nCount2 <- nCount2[unlist(cond2)]
+    vPlotData2 <- vPlotData2[which(vPlotData2$Time_Point %in% c(names(nCount2))),]
+  }
+  
+  # Timepoint 16 : 5 year
+  overall <- getProfileValue(dfSource = vPlotData, profileCondition = "RECTAL_MEAN")
+  patient <- getProfileValue(dfSource = vPlotData2, profileCondition = "RECTAL_MEAN")
+  Section <- c("Overall","Patient Specific Data")
+  Probability <- c(overall,patient)
+  riskRectal <- data.frame(Section, Probability)
+  
+  #overall <- round(100 - mean(vPlotData[which(vPlotData$Time_Point == 16),"RECTAL_MEAN"]),2)
+  #if ( nrow(vPlotData2) >= 1 & length(vPlotData2[which(vPlotData2$Time_Point == 16),"RECTAL_MEAN"]) >= 1 ) {
+  #  patient <- round(100 - mean(vPlotData2[which(vPlotData2$Time_Point == 16),"RECTAL_MEAN"]),2)
+  #  Section <- c("Overall","Patient Specific Data")
+  #  Probability <- c(overall,patient)
+  #  riskRectal <- data.frame(Section, Probability)
+  #} else {
+  #  Section <- c("Overall")
+  #  Probability <- c(overall)
+  #  riskRectal <- data.frame(Section, Probability)
+  #}
+  
+  return (riskRectal)
+  
+}
+dfRiskRectal <- riskfunc(vPlotData = values$df, vNData = nData()$df)
+#knitr::kable(head(dfRiskRectal),row.names = FALSE,caption="Rectal Risk")
+################################
+# rectal risk overall end
+################################
+
+################################
+# rectal Bleeding risk overall start
+################################
+riskfunc <- function(..., vPlotData, vNData) {
+  
+  #if ( vNData$T_STAGE_CATEGORY == "5") {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == 4 | vPlotData$T_STAGE_CATEGORY == 5)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #} else {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == vNData$T_STAGE_CATEGORY)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #}
+  vPlotData2 = vPlotData[which (vPlotData$PCAP_CLASS == vNData$PCAP_CLASS),]
+  if ( nrow(vPlotData2) >= 1 ) {
+    # patient
+    nCount2 <- c(table(vPlotData2$Time_Point))
+    cond2 <- lapply(nCount2, function(x) x > vNData$MinNum)
+    nCount2 <- nCount2[unlist(cond2)]
+    vPlotData2 <- vPlotData2[which(vPlotData2$Time_Point %in% c(names(nCount2))),]
+  }
+  # Timepoint 16 : 5 year
+  overall <- getProfileValue(dfSource = vPlotData, profileCondition = "EPIC_Q6_D_SCORE")
+  patient <- getProfileValue(dfSource = vPlotData2, profileCondition = "EPIC_Q6_D_SCORE")
+  Section <- c("Overall","Patient Specific Data")
+  Probability <- c(overall,patient)
+  riskRectal <- data.frame(Section, Probability)
+  #overall <- round(100 - mean(vPlotData[which(vPlotData$Time_Point == 16),"EPIC_Q6_D_SCORE"]),2)
+  #if ( nrow(vPlotData2) >= 1 & length(vPlotData2[which(vPlotData2$Time_Point == 16),"EPIC_Q6_D_SCORE"]) >= 1 ) {
+  #  patient <- round(100 - mean(vPlotData2[which(vPlotData2$Time_Point == 16),"EPIC_Q6_D_SCORE"]),2)
+  #  Section <- c("Overall","Patient Specific Data")
+  #  Probability <- c(overall,patient)
+  #  riskRectal <- data.frame(Section, Probability)
+  #} else {
+  #  Section <- c("Overall")
+  #  Probability <- c(overall)
+  #  riskRectal <- data.frame(Section, Probability)
+  #}
+  
+  return (riskRectal)
+  
+}
+
+dfRiskRectalBleeding <- riskfunc(vPlotData = values$df, vNData = nData()$df)
+#knitr::kable(head(dfRiskRectal),row.names = FALSE,caption="Rectal Bleeding Risk")
+################################
+# rectal Bleeding risk overall end
+################################
+
+################################
+# urinary risk overall start
+################################
+riskfunc <- function(..., vPlotData, vNData) {
+  #if ( vNData$T_STAGE_CATEGORY == "5") {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == 4 | vPlotData$T_STAGE_CATEGORY == 5)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #} else {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == vNData$T_STAGE_CATEGORY)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #}
+  vPlotData2 = vPlotData[which (vPlotData$PCAP_CLASS == vNData$PCAP_CLASS),]
+  if ( nrow(vPlotData2) >= 1 ) {
+    # patient
+    nCount2 <- c(table(vPlotData2$Time_Point))
+    cond2 <- lapply(nCount2, function(x) x > vNData$MinNum)
+    nCount2 <- nCount2[unlist(cond2)]
+    vPlotData2 <- vPlotData2[which(vPlotData2$Time_Point %in% c(names(nCount2))),]
+  }
+  # Timepoint 16 : 5 year
+  overall <- getProfileValue(dfSource = vPlotData, profileCondition = "EPIC_Q5_SCORE")
+  patient <- getProfileValue(dfSource = vPlotData2, profileCondition = "EPIC_Q5_SCORE")
+  Section <- c("Overall","Patient Specific Data")
+  Probability <- c(overall,patient)
+  riskRectal <- data.frame(Section, Probability)
+  #overall <- round(100 - mean(vPlotData[which(vPlotData$Time_Point == 16),"EPIC_Q5_SCORE"]),2)
+  #if ( nrow(vPlotData2) >= 1 & length(vPlotData2[which(vPlotData2$Time_Point == 16),"EPIC_Q5_SCORE"]) >= 1 ) {
+  #  patient <- round(100 - mean(vPlotData2[which(vPlotData2$Time_Point == 16),"EPIC_Q5_SCORE"]),2)
+  #  Section <- c("Overall","Patient Specific Data")
+  #  Probability <- c(overall,patient)
+  #  riskRectal <- data.frame(Section, Probability)
+  #} else {
+  #  Section <- c("Overall")
+  #  Probability <- c(overall)
+  #  riskRectal <- data.frame(Section, Probability)
+  #}
+  
+  return (riskRectal)
+  
+}
+dfRiskUrinary <- riskfunc(vPlotData = values$df, vNData = nData()$df)
+#knitr::kable(head(dfRiskUrinary),row.names = FALSE,caption="Urinary Risk")
+
+
+################################
+# urinary risk overall end
+################################
+
+################################
+# urinary Bleeding risk overall start
+################################
+riskfunc <- function(..., vPlotData, vNData) {
+  #if ( vNData$T_STAGE_CATEGORY == "5") {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == 4 | vPlotData$T_STAGE_CATEGORY == 5)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #} else {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == vNData$T_STAGE_CATEGORY)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #}
+  vPlotData2 = vPlotData[which (vPlotData$PCAP_CLASS == vNData$PCAP_CLASS),]
+  if ( nrow(vPlotData2) >= 1 ) {
+    # patient
+    nCount2 <- c(table(vPlotData2$Time_Point))
+    cond2 <- lapply(nCount2, function(x) x > vNData$MinNum)
+    nCount2 <- nCount2[unlist(cond2)]
+    vPlotData2 <- vPlotData2[which(vPlotData2$Time_Point %in% c(names(nCount2))),]
+  }
+  # Timepoint 16 : 5 year
+  overall <- getProfileValue(dfSource = vPlotData, profileCondition = "EPIC_Q4_C_SCORE")
+  patient <- getProfileValue(dfSource = vPlotData2, profileCondition = "EPIC_Q4_C_SCORE")
+  Section <- c("Overall","Patient Specific Data")
+  Probability <- c(overall,patient)
+  riskRectal <- data.frame(Section, Probability)
+  
+  #overall <- round(100 - mean(vPlotData[which(vPlotData$Time_Point == 16),"EPIC_Q4_C_SCORE"]),2)
+  #if ( nrow(vPlotData2) >= 1 & length(vPlotData2[which(vPlotData2$Time_Point == 16),"EPIC_Q4_C_SCORE"]) >= 1 ) {
+  #  patient <- round(100 - mean(vPlotData2[which(vPlotData2$Time_Point == 16),"EPIC_Q4_C_SCORE"]),2)
+  #  Section <- c("Overall","Patient Specific Data")
+  #  Probability <- c(overall,patient)
+  #  riskRectal <- data.frame(Section, Probability)
+  #} else {
+  #  Section <- c("Overall")
+  #  Probability <- c(overall)
+  #  riskRectal <- data.frame(Section, Probability)
+  #}
+  
+  return (riskRectal)
+  
+}
+dfRiskUrinaryBleeding <- riskfunc(vPlotData = values$df, vNData = nData()$df)
+#knitr::kable(head(dfRiskRectal),row.names = FALSE,caption="Urinary Bleeding Risk")
+
+################################
+# urinary Bleeding risk overall end
+################################
+
+################################
+# erectile dysfunction risk overall start
+################################
+riskfunc <- function(..., vPlotData, vNData) {
+  
+  #if ( vNData$T_STAGE_CATEGORY == "5") {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == 4 | vPlotData$T_STAGE_CATEGORY == 5)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #} else {
+  #  vPlotData2 = vPlotData[which( (vPlotData$AGE_CATEGORY == vNData$AGE_CATEGORY) 
+  #                                & (vPlotData$T_STAGE_CATEGORY == vNData$T_STAGE_CATEGORY)
+  #                                & (vPlotData$RISK_CATEGORY == vNData$RISK_CATEGORY) ),]
+  #}
+  vPlotData2 = vPlotData[which (vPlotData$PCAP_CLASS == vNData$PCAP_CLASS),]
+  if ( nrow(vPlotData2) >= 1 ) {
+    # patient
+    nCount2 <- c(table(vPlotData2$Time_Point))
+    cond2 <- lapply(nCount2, function(x) x > vNData$MinNum)
+    nCount2 <- nCount2[unlist(cond2)]
+    vPlotData2 <- vPlotData2[which(vPlotData2$Time_Point %in% c(names(nCount2))),]
+  }
+  # Timepoint 16 : 5 year
+  overall <- getProfileValue(dfSource = vPlotData, profileCondition = "SEXUAL_QOL_MEAN")
+  patient <- getProfileValue(dfSource = vPlotData2, profileCondition = "SEXUAL_QOL_MEAN")
+  Section <- c("Overall","Patient Specific Data")
+  Probability <- c(overall,patient)
+  riskRectal <- data.frame(Section, Probability)
+  
+  #overall <- round(100 - mean(vPlotData[which(vPlotData$Time_Point == 16),"SEXUAL_QOL_MEAN"]),2)
+  #if ( nrow(vPlotData2) >= 1 & length(vPlotData2[which(vPlotData2$Time_Point == 16),"SEXUAL_QOL_MEAN"]) >= 1 ) {
+  #  patient <- round(100 - mean(vPlotData2[which(vPlotData2$Time_Point == 16),"SEXUAL_QOL_MEAN"]),2)
+  #  Section <- c("Overall","Patient Specific Data")
+  #  Probability <- c(overall,patient)
+  #  riskRectal <- data.frame(Section, Probability)
+  #} else {
+  #  Section <- c("Overall")
+  #  Probability <- c(overall)
+  #  riskRectal <- data.frame(Section, Probability)
+  #}
+  
+  return (riskRectal)
+  
+}
+dfRiskErectileDysfunction <- riskfunc(vPlotData = values$df, vNData = nData()$df)
+#knitr::kable(head(dfRiskRectal),row.names = FALSE,caption="Erectile Dysfunction Risk")
+################################
+# erectile dysfunction risk overall end
+################################
+
+################################
+# gauge chart
+################################
+gg.gauge <- function(title, pos,breaks=c(0,30,70,100)) {
+  require(ggplot2)
+  get.poly <- function(a,b,r1=0.5,r2=1.0) {
+    th.start <- pi*(1-a/100)
+    th.end   <- pi*(1-b/100)
+    th       <- seq(th.start,th.end,length=100)
+    x        <- c(r1*cos(th),rev(r2*cos(th)))
+    y        <- c(r1*sin(th),rev(r2*sin(th)))
+    return(data.frame(x,y))
+  }
+  dfTemp <- get.poly(pos,pos,r1=0.5,r2=1)
+  nRow <- nrow(dfTemp)
+  dfArrow <- dfTemp[c(1,nRow),]
+  
+  myplot <- ggplot() + #labs(caption=title) + 
+    #theme(plot.caption = element_text(hjust = -0.5)) +  
+    annotate(geom="text", x = 0, y = -0.2, label = title, hjust=0.5, vjust=0.1, size=4) +
+    geom_polygon(data=get.poly(breaks[1],breaks[2]),aes(x,y),fill="yellowgreen")+
+    geom_polygon(data=get.poly(breaks[2],breaks[3]),aes(x,y),fill="gold")+
+    geom_polygon(data=get.poly(breaks[3],breaks[4]),aes(x,y),fill="red")+
+    #geom_polygon(data=get.poly(pos,pos,r1=0.5,r2=1),aes(x,y))+
+    geom_text(data=as.data.frame(breaks), size=2, fontface="bold", vjust=0,
+              aes(x=1.1*cos(pi*(1-breaks/100)),y=1.1*sin(pi*(1-breaks/100)),label=paste0(breaks,"%")))+
+    annotate("text",x=0,y=0,label=pos,vjust=0,size=8,fontface="bold")+
+    coord_fixed()+
+    theme_bw()+
+    theme(axis.text=element_blank(),
+          axis.title=element_blank(),
+          axis.ticks=element_blank(),
+          panel.grid=element_blank(),
+          panel.border=element_blank()) 
+  # if pos >= 50 then change arrow direction
+    if ( pos < 50 ) {
+      myplot + geom_line(data=dfArrow,aes(x,y),arrow=arrow(angle=15,ends="first",type="closed",length=unit(0.2,"cm")),size=1,col="darkblue")
+    } else {
+      myplot + geom_line(data=dfArrow,aes(x,y),arrow=arrow(angle=15,ends="last",type="closed",length=unit(0.2,"cm")),size=1,col="darkblue")
+    }
+}
+require(gridExtra)
+grid.newpage()
+n1 <- round(100-dfDiseaseFree[2,2],2)
+n2 <- round(100-dfRiskRectal[2,2],2)
+n3 <- round(100-dfRiskRectalBleeding[2,2],2)
+n4 <- round(100-dfRiskUrinary[2,2],2)
+n5 <- round(100-dfRiskUrinaryBleeding[2,2],2)
+n6 <- round(100-dfRiskErectileDysfunction[2,2],2)
+if (!is.na(n1) & !is.na(n2) & !is.na(n3) & !is.na(n4) & !is.na(n5) & !is.na(n6) ) {
+grid.draw(arrangeGrob(gg.gauge(title="Risk of Rectal QOL",pos=n2),gg.gauge(title="Risk of Rectal Bleeding",pos=n3),
+                      gg.gauge(title="Risk of Urinary QOL",pos=n4),gg.gauge(title="Risk of Urinary Bleeding",pos=n5),
+                      gg.gauge(title="Risk of Erectile Dysfunction",pos=n6),
+                      ncol=2))
+}
+```
+
+Disclaimer - Not for use for patient care, this information is for investigational use only.

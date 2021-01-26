@@ -1,0 +1,128 @@
+
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> # Submitted to OSEHRA 05/25/2017 by Jihwan Park.
+> # Original routine authored by Jihwan Park 2017.
+> 
+> require(shiny)
+Loading required package: shiny
+> folder_address = '/srv/shiny-server/PCO/App-1'
+> stopApp()
+> runApp(folder_address, launch.browser=TRUE, host="0.0.0.0", port=3838)
+
+Listening on http://0.0.0.0:3838
+/usr/bin/xdg-open: 851: /usr/bin/xdg-open: www-browser: not found
+/usr/bin/xdg-open: 851: /usr/bin/xdg-open: links2: not found
+/usr/bin/xdg-open: 851: /usr/bin/xdg-open: elinks: not found
+/usr/bin/xdg-open: 851: /usr/bin/xdg-open: links: not found
+/usr/bin/xdg-open: 851: /usr/bin/xdg-open: lynx: not found
+/usr/bin/xdg-open: 851: /usr/bin/xdg-open: w3m: not found
+xdg-open: no method available for opening 'http://127.0.0.1:3838'
+Loading required package: openxlsx
+Loading required package: DT
+
+Attaching package: ‘DT’
+
+The following objects are masked from ‘package:shiny’:
+
+    dataTableOutput, renderDataTable
+
+Loading required package: ggplot2
+Loading required package: nlme
+Loading required package: grid
+Loading required package: stringr
+Loading required package: shinyjs
+
+Attaching package: ‘shinyjs’
+
+The following object is masked from ‘package:shiny’:
+
+    runExample
+
+The following objects are masked from ‘package:methods’:
+
+    removeClass, show
+
+Loading required package: shinythemes
+Loading required package: ggthemes
+Loading required package: survival
+Loading required package: GGally
+Registered S3 method overwritten by 'GGally':
+  method from   
+  +.gg   ggplot2
+Loading required package: scales
+Loading required package: knitr
+Loading required package: rmarkdown
+Loading required package: xtable
+Loading required package: survminer
+Loading required package: ggpubr
+Loading required package: magrittr
+Loading required package: partykit
+Loading required package: libcoin
+Loading required package: mvtnorm
+Loading required package: RMySQL
+Loading required package: DBI
+Loading required package: formattable
+
+Attaching package: ‘formattable’
+
+The following object is masked from ‘package:xtable’:
+
+    digits
+
+The following objects are masked from ‘package:scales’:
+
+    comma, percent, scientific
+
+Loading required package: radarchart
+Loading required package: plotly
+
+Attaching package: ‘plotly’
+
+The following object is masked from ‘package:formattable’:
+
+    style
+
+The following object is masked from ‘package:ggplot2’:
+
+    last_plot
+
+The following object is masked from ‘package:stats’:
+
+    filter
+
+The following object is masked from ‘package:graphics’:
+
+    layout
+
+Loading required package: sendmailR
+Loading required package: V8
+Using V8 engine 3.14.5.9
+
+Attaching package: ‘V8’
+
+The following object is masked from ‘package:DT’:
+
+    JS
+
+Loading required package: mailR
+Warning in renderWidget(instance) :
+  Ignoring explicitly provided widget ID "369c6e87528c"; Shiny doesn't use them
